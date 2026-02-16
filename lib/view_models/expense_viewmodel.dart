@@ -5,6 +5,7 @@ import '../models/category.dart';
 class ExpenseViewModel extends ChangeNotifier {
   final List<Expense> _expenses = [];
 
+  // Get the list.
   List<Expense> get expenses => [..._expenses];
 
   // Calculate total expenses.
@@ -31,6 +32,7 @@ class ExpenseViewModel extends ChangeNotifier {
   void updateExpense(String id, String title, double amount, Category category, String description) {
     final index = _expenses.indexWhere((e) => e.id == id);
 
+    // Creating a new expense instead of editing an existing expense in the list but keeps previous unchanged data.
     if (index != -1) {
       _expenses[index] = Expense(
         id: id,

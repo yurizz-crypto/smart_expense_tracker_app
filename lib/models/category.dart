@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// Model for category as I wanted it to have distinct color and icon.
 class Category {
   final String name;
   final IconData icon;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'expense.dart';
 import 'add_expense.dart';
 
+// Widget for the bottom navigation and screen switching.
 class SmartTrackerHome extends StatefulWidget {
   const SmartTrackerHome({super.key});
 

@@ -5,6 +5,7 @@ import '../view_models/expense_viewmodel.dart';
 import '../models/category.dart';
 import '../models/expense.dart';
 
+// Main screen of the application.
 class ExpenseListView extends StatefulWidget {
   const ExpenseListView({super.key});
 
@@ -19,6 +20,7 @@ class _ExpenseListViewState extends State<ExpenseListView> {
   Widget build(BuildContext context) {
     final vm = Provider.of<ExpenseViewModel>(context);
 
+    // Check if there's a selected category.
     final filteredExpenses = _selectedFilter == null
         ? vm.expenses
         : vm.expenses.where((e) => e.category.name == _selectedFilter!.name).toList();
@@ -49,6 +51,8 @@ class _ExpenseListViewState extends State<ExpenseListView> {
 
           _buildFilterBar(),
 
+          // Checks if the list from the provider is empty.
+          // If not shows the contents.
           Expanded(
             child: filteredExpenses.isEmpty
                 ? _buildEmptyState()
@@ -59,6 +63,7 @@ class _ExpenseListViewState extends State<ExpenseListView> {
     );
   }
 
+  // Changes the selected category on tap.
   Widget _buildFilterBar() {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -92,6 +97,7 @@ class _ExpenseListViewState extends State<ExpenseListView> {
     );
   }
 
+  // To tell the user if the list is empty or a particular category is empty.
   Widget _buildEmptyState() {
     return Center(
       child: Column(
@@ -108,6 +114,7 @@ class _ExpenseListViewState extends State<ExpenseListView> {
     );
   }
 
+  // Widget to show all the expenses with the selected category filtered or not as parameter.
   Widget _showContent(BuildContext context, List<Expense> expenses, ExpenseViewModel vm) {
     return ListView.builder(
       itemCount: expenses.length,
@@ -145,6 +152,7 @@ class _ExpenseListViewState extends State<ExpenseListView> {
     );
   }
 
+  // Show a dialog to confirm if the user is actually going to delete a certain expense.
   void _confirmDelete(BuildContext context, ExpenseViewModel vm, String id) {
     showDialog(
       context: context,

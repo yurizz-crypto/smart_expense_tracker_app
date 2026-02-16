@@ -4,6 +4,7 @@ import '../view_models/expense_viewmodel.dart';
 import '../models/category.dart';
 import '../models/expense.dart';
 
+// Screen (stateful widget) for adding or editing an existing expense.
 class AddExpenseView extends StatefulWidget {
   final Expense? expenseToEdit;
 
@@ -22,12 +23,14 @@ class _AddExpenseViewState extends State<AddExpenseView> {
   @override
   void initState() {
     super.initState();
+    // Fields I needed to create a new expense.
     _titleController = TextEditingController(text: widget.expenseToEdit?.title ?? "");
     _amountController = TextEditingController(text: widget.expenseToEdit?.amount.toString() ?? "");
     _descriptionController = TextEditingController(text: widget.expenseToEdit?.description ?? "");
     _selectedCategory = widget.expenseToEdit?.category;
   }
 
+  // Get the inputted data.
   void _submitData() {
     final title = _titleController.text;
     final amount = double.tryParse(_amountController.text) ?? 0;
@@ -42,6 +45,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
 
     final vm = Provider.of<ExpenseViewModel>(context, listen: false);
 
+    // Check if editing or not.
     if (widget.expenseToEdit == null) {
       vm.addExpense(title, amount, _selectedCategory!, description);
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Expense Added!")));
@@ -75,6 +79,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
     super.dispose();
   }
 
+  // UI for adding/editing an expense.
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.expenseToEdit != null;
@@ -90,7 +95,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
         children: [
           Text(
               isEditing ? "Edit Expense" : "Add New Expense",
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, height: 5)
           ),
           const SizedBox(height: 15),
 

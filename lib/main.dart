@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:smart_expense_tracker_app/view_models/expense_viewmodel.dart';
 import 'package:smart_expense_tracker_app/views/home_screen.dart';
 
+// Entry point of my app.
+// I looked online and I saw that I can just make the main and build together but this is a better practice.
 void main() {
   runApp(
     ChangeNotifierProvider(

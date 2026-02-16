@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../../models/expense.dart';
 import '../add_expense.dart';
 
+// Stateless widget class to show the details of a certain expense.
 class ExpenseDetailSheet extends StatelessWidget {
   final Expense expense;
 
@@ -21,11 +22,13 @@ class ExpenseDetailSheet extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
 
+              // To show the icon I set in category model
               CircleAvatar(
                 backgroundColor: expense.category.color.withAlpha(50),
                 child: Icon(expense.category.icon, color: expense.category.color),
               ),
 
+              // Button to edit a certain expense using a model but still reuses the screen when adding expense.
               IconButton(
                 icon: const Icon(Icons.edit_note, size: 30),
                 onPressed: () {

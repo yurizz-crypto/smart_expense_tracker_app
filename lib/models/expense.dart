@@ -1,5 +1,6 @@
 import 'category.dart';
 
+// Model for expense with the Category model.
 class Expense {
   final String id;
   final String title;
