@@ -6,7 +6,6 @@ import '../view_models/expense_viewmodel.dart';
 import '../models/category.dart';
 import '../models/expense.dart';
 
-// Main screen of the application.
 class ExpenseListView extends StatefulWidget {
   const ExpenseListView({super.key});
 
@@ -21,50 +20,65 @@ class _ExpenseListViewState extends State<ExpenseListView> {
   Widget build(BuildContext context) {
     final vm = Provider.of<ExpenseViewModel>(context);
 
-    // Check if there's a selected category.
-    final filteredExpenses = _selectedFilter == null
-        ? vm.expenses
-        : vm.expenses.where((e) => e.category.name == _selectedFilter!.name).toList();
-
     return Scaffold(
       appBar: AppBar(title: const Text("Smart Tracker")),
-      body: Column(
+      body: StreamBuilder<List<Expense>>(
+        // Part G: Update UI to use StreamBuilder
+        stream: vm.expensesStream,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text("Error: ${snapshot.error}"));
+          }
+
+          final allExpenses = snapshot.data ?? [];
+          final filteredExpenses = _selectedFilter == null
+              ? allExpenses
+              : allExpenses.where((e) => e.category.name == _selectedFilter!.name).toList();
+
+          final totalAmount = filteredExpenses.fold(0.0, (sum, item) => sum + item.amount);
+
+          return Column(
+            children: [
+              _buildTotalHeader(totalAmount),
+              _buildFilterBar(),
+              Expanded(
+                child: filteredExpenses.isEmpty
+                    ? _buildEmptyState()
+                    : _showContent(context, filteredExpenses, vm),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildTotalHeader(double total) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(colors: [Colors.blue, Colors.blueAccent]),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Column(
         children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            margin: const EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [Colors.blue, Colors.blueAccent]),
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Column(
-              children: [
-                const Text("Total Expenses", style: TextStyle(color: Colors.white, fontSize: 18)),
-                const SizedBox(height: 10),
-                Text(
-                  "₱ ${vm.totalExpenses.toStringAsFixed(2)}",
-                  style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ),
-
-          _buildFilterBar(),
-
-          // Checks if the list from the provider is empty.
-          // If not shows the contents.
-          Expanded(
-            child: filteredExpenses.isEmpty
-                ? _buildEmptyState()
-                : _showContent(context, filteredExpenses, vm),
+          const Text("Total Expenses", style: TextStyle(color: Colors.white, fontSize: 18)),
+          const SizedBox(height: 10),
+          Text(
+            "₱ ${total.toStringAsFixed(2)}",
+            style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
           ),
         ],
       ),
     );
   }
 
-  // Changes the selected category on tap.
   Widget _buildFilterBar() {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -99,7 +113,6 @@ class _ExpenseListViewState extends State<ExpenseListView> {
     );
   }
 
-  // To tell the user if the list is empty or a particular category is empty.
   Widget _buildEmptyState() {
     return Center(
       child: Column(
@@ -116,7 +129,6 @@ class _ExpenseListViewState extends State<ExpenseListView> {
     );
   }
 
-  // Widget to show all the expenses with the selected category filtered or not as parameter.
   Widget _showContent(BuildContext context, List<Expense> expenses, ExpenseViewModel vm) {
     return ListView.builder(
       itemCount: expenses.length,
@@ -137,12 +149,10 @@ class _ExpenseListViewState extends State<ExpenseListView> {
             child: Icon(expense.category.icon, color: expense.category.color),
           ),
           title: Text(expense.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-          // Updated subtitle to use DateFormat
           subtitle: Text("${expense.category.name} • ${DateFormat.yMMMd().format(expense.date)}"),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Updated to Peso Sign
               Text("₱ ${expense.amount.toStringAsFixed(2)}",
                   style: const TextStyle(fontWeight: FontWeight.bold)),
               IconButton(
@@ -156,21 +166,28 @@ class _ExpenseListViewState extends State<ExpenseListView> {
     );
   }
 
-  // Show a dialog to confirm if the user is actually going to delete a certain expense.
   void _confirmDelete(BuildContext context, ExpenseViewModel vm, String id) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (dialogCtx) => AlertDialog(
         title: const Text("Confirm Delete"),
         content: const Text("Are you sure you want to remove this expense?"),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancel")),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: const Text("Cancel"),
+          ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () {
-              vm.deleteExpense(id);
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
+            onPressed: () async {
+              final navigator = Navigator.of(dialogCtx);
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+              // Delete Expense from Firestore
+              await vm.deleteExpense(id);
+
+              navigator.pop();
+              scaffoldMessenger.showSnackBar(
                 const SnackBar(content: Text("Expense deleted")),
               );
             },

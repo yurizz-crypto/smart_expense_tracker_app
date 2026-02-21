@@ -1,48 +1,59 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../models/expense.dart';
 import '../models/category.dart';
 
 class ExpenseViewModel extends ChangeNotifier {
-  final List<Expense> _expenses = [];
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  List<Expense> get expenses => [..._expenses];
+  // Stream of expenses for real-time updates
+  Stream<List<Expense>> get expensesStream {
+    return _firestore.collection('expenses').orderBy('date', descending: true).snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
 
-  double get totalExpenses {
-    return _expenses.fold(0.0, (sum, item) => sum + item.amount);
-  }
+        // Find the category object based on the name stored in Firestore
+        final category = appCategories.firstWhere(
+              (cat) => cat.name == data['category'],
+          orElse: () => appCategories.last,
+        );
 
-  void addExpense(String title, double amount, Category category, String description, DateTime date) {
-    final newExpense = Expense(
-      id: DateTime.now().toString(),
-      title: title,
-      amount: amount,
-      description: description,
-      date: date,
-      category: category,
-    );
-
-    _expenses.add(newExpense);
-    notifyListeners();
-  }
-
-  void updateExpense(String id, String title, double amount, Category category, String description, DateTime date) {
-    final index = _expenses.indexWhere((e) => e.id == id);
-
-    if (index != -1) {
-      _expenses[index] = Expense(
-          id: id,
-          title: title,
-          amount: amount,
+        return Expense(
+          id: doc.id,
+          title: data['title'],
+          amount: (data['amount'] as num).toDouble(),
           category: category,
-          description: description,
-          date: date
-      );
-      notifyListeners();
-    }
+          description: data['description'],
+          date: (data['date'] as Timestamp).toDate(),
+        );
+      }).toList();
+    });
   }
 
-  void deleteExpense(String id) {
-    _expenses.removeWhere((e) => e.id == id);
-    notifyListeners();
+  // Add Expense
+  Future<void> addExpense(String title, double amount, Category category, String description, DateTime date) async {
+    await _firestore.collection('expenses').add({
+      'title': title,
+      'amount': amount,
+      'category': category.name,
+      'description': description,
+      'date': date,
+    });
+  }
+
+  // Update Expense
+  Future<void> updateExpense(String id, String title, double amount, Category category, String description, DateTime date) async {
+    await _firestore.collection('expenses').doc(id).update({
+      'title': title,
+      'amount': amount,
+      'category': category.name,
+      'description': description,
+      'date': date,
+    });
+  }
+
+  // Delete Expense
+  Future<void> deleteExpense(String id) async {
+    await _firestore.collection('expenses').doc(id).delete();
   }
 }
