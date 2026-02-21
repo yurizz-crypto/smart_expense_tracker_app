@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import './components/expense_details.dart';
 import '../view_models/expense_viewmodel.dart';
@@ -42,7 +43,7 @@ class _ExpenseListViewState extends State<ExpenseListView> {
                 const Text("Total Expenses", style: TextStyle(color: Colors.white, fontSize: 18)),
                 const SizedBox(height: 10),
                 Text(
-                  "\$${vm.totalExpenses.toStringAsFixed(2)}",
+                  "₱ ${vm.totalExpenses.toStringAsFixed(2)}",
                   style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
                 ),
               ],
@@ -75,7 +76,8 @@ class _ExpenseListViewState extends State<ExpenseListView> {
             selected: _selectedFilter == null,
             onSelected: (_) => setState(() => _selectedFilter = null),
           ),
-          const SizedBox(width: 8), ...appCategories.map((category) => Padding(
+          const SizedBox(width: 8),
+          ...appCategories.map((category) => Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: FilterChip(
               avatar: Icon(category.icon,
@@ -135,11 +137,13 @@ class _ExpenseListViewState extends State<ExpenseListView> {
             child: Icon(expense.category.icon, color: expense.category.color),
           ),
           title: Text(expense.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-          subtitle: Text("${expense.category.name} • ${expense.date.toString().split(' ')[0]}"),
+          // Updated subtitle to use DateFormat
+          subtitle: Text("${expense.category.name} • ${DateFormat.yMMMd().format(expense.date)}"),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("\$${expense.amount.toStringAsFixed(2)}",
+              // Updated to Peso Sign
+              Text("₱ ${expense.amount.toStringAsFixed(2)}",
                   style: const TextStyle(fontWeight: FontWeight.bold)),
               IconButton(
                 icon: const Icon(Icons.delete, color: Colors.redAccent),

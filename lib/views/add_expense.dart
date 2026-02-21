@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../view_models/expense_viewmodel.dart';
 import '../models/category.dart';
 import '../models/expense.dart';
 
-// Screen (stateful widget) for adding or editing an existing expense.
 class AddExpenseView extends StatefulWidget {
   final Expense? expenseToEdit;
 
@@ -18,36 +18,59 @@ class _AddExpenseViewState extends State<AddExpenseView> {
   late TextEditingController _titleController;
   late TextEditingController _amountController;
   late TextEditingController _descriptionController;
+  late DateTime _selectedDate;
   Category? _selectedCategory;
 
   @override
   void initState() {
     super.initState();
-    // Fields I needed to create a new expense.
     _titleController = TextEditingController(text: widget.expenseToEdit?.title ?? "");
     _amountController = TextEditingController(text: widget.expenseToEdit?.amount.toString() ?? "");
     _descriptionController = TextEditingController(text: widget.expenseToEdit?.description ?? "");
+    _selectedDate = widget.expenseToEdit?.date ?? DateTime.now();
     _selectedCategory = widget.expenseToEdit?.category;
   }
 
-  // Get the inputted data.
-  void _submitData() {
-    final title = _titleController.text;
-    final amount = double.tryParse(_amountController.text) ?? 0;
-    final description = _descriptionController.text;
+  void _presentDatePicker() async {
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(), // Prevents picking future dates
+    );
+    if (pickedDate != null) {
+      setState(() => _selectedDate = pickedDate);
+    }
+  }
 
-    if (title.isEmpty || amount <= 0 || _selectedCategory == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter a valid title, category, and amount")),
-      );
+  void _submitData() {
+    final title = _titleController.text.trim();
+    final amountText = _amountController.text.trim();
+    final amount = double.tryParse(amountText) ?? 0;
+    final description = _descriptionController.text.trim();
+
+    // Specific Error Handling
+    if (title.isEmpty) {
+      _showError("Title cannot be empty");
+      return;
+    }
+    if (amountText.isEmpty) {
+      _showError("Please enter an amount");
+      return;
+    }
+    if (amount <= 0) {
+      _showError("Amount must be greater than zero");
+      return;
+    }
+    if (_selectedCategory == null) {
+      _showError("Please select a category");
       return;
     }
 
     final vm = Provider.of<ExpenseViewModel>(context, listen: false);
 
-    // Check if editing or not.
     if (widget.expenseToEdit == null) {
-      vm.addExpense(title, amount, _selectedCategory!, description);
+      vm.addExpense(title, amount, _selectedCategory!, description, _selectedDate);
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Expense Added!")));
     } else {
       vm.updateExpense(
@@ -56,6 +79,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
         amount,
         _selectedCategory!,
         description,
+        _selectedDate,
       );
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Expense Updated!")));
       Navigator.pop(context);
@@ -65,10 +89,22 @@ class _AddExpenseViewState extends State<AddExpenseView> {
       _titleController.clear();
       _amountController.clear();
       _descriptionController.clear();
-      setState(() => _selectedCategory = null);
+      setState(() {
+        _selectedCategory = null;
+        _selectedDate = DateTime.now();
+      });
     }
-
     FocusScope.of(context).unfocus();
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
@@ -79,7 +115,6 @@ class _AddExpenseViewState extends State<AddExpenseView> {
     super.dispose();
   }
 
-  // UI for adding/editing an expense.
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.expenseToEdit != null;
@@ -94,10 +129,21 @@ class _AddExpenseViewState extends State<AddExpenseView> {
       child: Column(
         children: [
           Text(
-              isEditing ? "Edit Expense" : "Add New Expense",
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, height: 5)
+            isEditing ? "Edit Expense" : "Add New Expense",
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, height: 6),
           ),
           const SizedBox(height: 15),
+
+          Row(
+            children: [
+              Expanded(child: Text("Date: ${DateFormat.yMMMd().format(_selectedDate)}")),
+              TextButton(
+                onPressed: _presentDatePicker,
+                child: const Text("Choose Date", style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
 
           DropdownButtonFormField<Category>(
             initialValue: _selectedCategory,
@@ -123,21 +169,21 @@ class _AddExpenseViewState extends State<AddExpenseView> {
           const SizedBox(height: 10),
 
           TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(labelText: "Title")
+            controller: _titleController,
+            decoration: const InputDecoration(labelText: "Title"),
           ),
           const SizedBox(height: 10),
 
           TextField(
             controller: _amountController,
-            decoration: const InputDecoration(labelText: "Amount"),
-            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(labelText: "Amount", prefixText: "₱ "),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
           ),
           const SizedBox(height: 10),
 
           TextField(
-              controller: _descriptionController,
-              decoration: const InputDecoration(labelText: "Description (Optional)")
+            controller: _descriptionController,
+            decoration: const InputDecoration(labelText: "Description (Optional)"),
           ),
           const SizedBox(height: 25),
 
@@ -147,9 +193,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
               onPressed: _submitData,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               child: Text(isEditing ? "Save Changes" : "Add Expense"),
             ),
