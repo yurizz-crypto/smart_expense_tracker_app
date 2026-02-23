@@ -36,7 +36,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
       context: context,
       initialDate: _selectedDate,
       firstDate: DateTime(2020),
-      lastDate: DateTime.now(), // Prevents picking future dates
+      lastDate: DateTime.now(),
     );
     if (pickedDate != null) {
       setState(() => _selectedDate = pickedDate);

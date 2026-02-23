@@ -28,7 +28,7 @@ class ExpenseDetailSheet extends StatelessWidget {
                 child: Icon(expense.category.icon, color: expense.category.color),
               ),
 
-              // Button to edit a certain expense using a model but still reuses the screen when adding expense.
+              // Button to edit a certain expense using model but still reuses the screen when adding expense.
               IconButton(
                 icon: const Icon(Icons.edit_note, size: 30),
                 onPressed: () {
@@ -53,7 +53,7 @@ class ExpenseDetailSheet extends StatelessWidget {
           const Divider(height: 32),
 
           const Text("Amount", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-          Text("\$${expense.amount.toStringAsFixed(2)}", style: const TextStyle(fontSize: 20)),
+          Text("₱ ${expense.amount.toStringAsFixed(2)}", style: const TextStyle(fontSize: 20)),
 
           const SizedBox(height: 16),
 

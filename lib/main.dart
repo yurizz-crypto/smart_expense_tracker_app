@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        textTheme: GoogleFonts.poppinsTextTheme(
+        textTheme: GoogleFonts.montserratTextTheme(
           Theme.of(context).textTheme,
         ),
       ),

@@ -23,7 +23,6 @@ class _ExpenseListViewState extends State<ExpenseListView> {
     return Scaffold(
       appBar: AppBar(title: const Text("Smart Tracker")),
       body: StreamBuilder<List<Expense>>(
-        // Part G: Update UI to use StreamBuilder
         stream: vm.expensesStream,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
