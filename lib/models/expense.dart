@@ -1,6 +1,6 @@
 import 'category.dart';
 
-// Model for expense with the Category model.
+// This model handles all the specific details for an individual transaction, linking it to a category.
 class Expense {
   final String id;
   final String title;

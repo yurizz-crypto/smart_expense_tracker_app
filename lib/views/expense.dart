@@ -6,6 +6,7 @@ import '../view_models/expense_viewmodel.dart';
 import '../models/category.dart';
 import '../models/expense.dart';
 
+// This main view displays the list of all tracked expenses with options to filter and view totals.
 class ExpenseListView extends StatefulWidget {
   const ExpenseListView({super.key});
 
@@ -33,11 +34,13 @@ class _ExpenseListViewState extends State<ExpenseListView> {
             return Center(child: Text("Error: ${snapshot.error}"));
           }
 
+          // The list is filtered based on the user's selection, or shown in full if no filter is active.
           final allExpenses = snapshot.data ?? [];
           final filteredExpenses = _selectedFilter == null
               ? allExpenses
               : allExpenses.where((e) => e.category.name == _selectedFilter!.name).toList();
 
+          // This calculates the sum of all visible expenses to keep the header total accurate.
           final totalAmount = filteredExpenses.fold(0.0, (sum, item) => sum + item.amount);
 
           return Column(
@@ -56,6 +59,7 @@ class _ExpenseListViewState extends State<ExpenseListView> {
     );
   }
 
+  // This header creates a prominent visual summary of the total spending.
   Widget _buildTotalHeader(double total) {
     return Container(
       width: double.infinity,
@@ -78,6 +82,7 @@ class _ExpenseListViewState extends State<ExpenseListView> {
     );
   }
 
+  // This horizontal bar allows users to toggle between different categories to narrow down the list.
   Widget _buildFilterBar() {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -112,6 +117,7 @@ class _ExpenseListViewState extends State<ExpenseListView> {
     );
   }
 
+  // A simple placeholder that appears when there are no transactions to show.
   Widget _buildEmptyState() {
     return Center(
       child: Column(
@@ -128,6 +134,7 @@ class _ExpenseListViewState extends State<ExpenseListView> {
     );
   }
 
+  // This builds the scrollable list of expense items, each opening a detail sheet when tapped.
   Widget _showContent(BuildContext context, List<Expense> expenses, ExpenseViewModel vm) {
     return ListView.builder(
       itemCount: expenses.length,
@@ -165,6 +172,7 @@ class _ExpenseListViewState extends State<ExpenseListView> {
     );
   }
 
+  // A safety dialog ensures the user actually wants to delete a record before it is permanently removed.
   void _confirmDelete(BuildContext context, ExpenseViewModel vm, String id) {
     showDialog(
       context: context,
@@ -182,7 +190,6 @@ class _ExpenseListViewState extends State<ExpenseListView> {
               final navigator = Navigator.of(dialogCtx);
               final scaffoldMessenger = ScaffoldMessenger.of(context);
 
-              // Delete Expense from Firestore
               await vm.deleteExpense(id);
 
               navigator.pop();

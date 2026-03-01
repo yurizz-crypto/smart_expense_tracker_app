@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
-// Model for category as I wanted it to have distinct color and icon.
+// This class acts like a blueprint to bundle a label, an icon, and a specific color for each expense.
 class Category {
   final String name;
   final IconData icon;
   final Color color;
 
+  // I use required parameters to ensure every category always has its unique details set.
   const Category({
     required this.name,
     required this.icon,
@@ -13,6 +14,7 @@ class Category {
   });
 }
 
+// This hardcoded list provides a quick way to load common spending categories into menus or filters.
 const List<Category> appCategories = [
   Category(name: 'Food', icon: Icons.restaurant, color: Colors.orange),
   Category(name: 'Transport', icon: Icons.directions_car, color: Colors.blue),

@@ -5,13 +5,16 @@ import 'package:provider/provider.dart';
 import 'package:smart_expense_tracker_app/view_models/expense_viewmodel.dart';
 import 'package:smart_expense_tracker_app/views/home_screen.dart';
 
-// Entry point of my app.
-// I looked online and I saw that I can just make the main and build together but this is a better practice.
+// This is the main entry point where the application starts its execution.
 void main() async {
+  // Ensuring the Flutter engine is fully initialized is necessary before running any asynchronous setup tasks.
   WidgetsFlutterBinding.ensureInitialized();
+
+  // This step establishes the connection to Firebase services for backend data management.
   await Firebase.initializeApp();
 
   runApp(
+    // The ChangeNotifierProvider covers the app to make the expense data accessible to any screen that needs it.
     ChangeNotifierProvider(
       create: (context) => ExpenseViewModel(),
       child: const MyApp(),

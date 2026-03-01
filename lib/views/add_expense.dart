@@ -5,6 +5,7 @@ import '../view_models/expense_viewmodel.dart';
 import '../models/category.dart';
 import '../models/expense.dart';
 
+// This class provides the interface for both adding new expenses and updating existing ones.
 class AddExpenseView extends StatefulWidget {
   final Expense? expenseToEdit;
 
@@ -24,6 +25,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
   @override
   void initState() {
     super.initState();
+    // Controllers and variables are initialized here, pulling data from an existing expense if one is being edited.
     _titleController = TextEditingController(text: widget.expenseToEdit?.title ?? "");
     _amountController = TextEditingController(text: widget.expenseToEdit?.amount.toString() ?? "");
     _descriptionController = TextEditingController(text: widget.expenseToEdit?.description ?? "");
@@ -31,6 +33,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
     _selectedCategory = widget.expenseToEdit?.category;
   }
 
+  // This opens the calendar to let the user pick a specific date for the transaction.
   void _presentDatePicker() async {
     final pickedDate = await showDatePicker(
       context: context,
@@ -43,13 +46,14 @@ class _AddExpenseViewState extends State<AddExpenseView> {
     }
   }
 
+  // This part validates the form input before either adding a new entry or saving updates via the view model.
   void _submitData() {
     final title = _titleController.text.trim();
     final amountText = _amountController.text.trim();
     final amount = double.tryParse(amountText) ?? 0;
     final description = _descriptionController.text.trim();
 
-    // Specific Error Handling
+    // These checks ensure the data is complete and accurate before processing the submission.
     if (title.isEmpty) {
       _showError("Title cannot be empty");
       return;
@@ -85,6 +89,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
       Navigator.pop(context);
     }
 
+    // Resetting the form fields after a successful add keeps the UI ready for the next entry.
     if (widget.expenseToEdit == null) {
       _titleController.clear();
       _amountController.clear();
@@ -97,6 +102,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
     FocusScope.of(context).unfocus();
   }
 
+  // A helper function to display a consistent error message using a SnackBar.
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -145,6 +151,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
           ),
           const SizedBox(height: 10),
 
+          // The dropdown menu maps the predefined categories to a selectable list with icons and labels.
           DropdownButtonFormField<Category>(
             initialValue: _selectedCategory,
             decoration: InputDecoration(
@@ -187,6 +194,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
           ),
           const SizedBox(height: 25),
 
+          // The primary action button changes its label based on whether the user is adding or editing.
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(

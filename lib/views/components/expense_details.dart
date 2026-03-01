@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import '../../models/expense.dart';
 import '../add_expense.dart';
 
-// Stateless widget class to show the details of a certain expense.
+// This widget creates a slide-up summary that displays all the saved information for a specific transaction.
 class ExpenseDetailSheet extends StatelessWidget {
   final Expense expense;
 
@@ -13,7 +13,6 @@ class ExpenseDetailSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(24.0),
-
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -21,14 +20,13 @@ class ExpenseDetailSheet extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-
-              // To show the icon I set in category model
+              // The category's specific icon and color.
               CircleAvatar(
                 backgroundColor: expense.category.color.withAlpha(50),
                 child: Icon(expense.category.icon, color: expense.category.color),
               ),
 
-              // Button to edit a certain expense using model but still reuses the screen when adding expense.
+              // This button closes the current view and reopens the input form pre-filled with the existing data.
               IconButton(
                 icon: const Icon(Icons.edit_note, size: 30),
                 onPressed: () {
@@ -40,13 +38,13 @@ class ExpenseDetailSheet extends StatelessWidget {
                   );
                 },
               ),
-
             ],
           ),
           const SizedBox(height: 16),
 
           Text(expense.title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
 
+          // Combining the category name and a formatted date keeps the header clean and readable.
           Text("${expense.category.name} • ${DateFormat.yMMMd().format(expense.date)}",
               style: const TextStyle(color: Colors.grey)),
 
@@ -58,6 +56,7 @@ class ExpenseDetailSheet extends StatelessWidget {
           const SizedBox(height: 16),
 
           const Text("Description", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+          // This check handles empty descriptions by providing a simple placeholder message.
           Text(
             expense.description?.isNotEmpty == true ? expense.description! : "No description provided.",
             style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
